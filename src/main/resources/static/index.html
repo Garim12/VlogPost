@@ -50,6 +50,12 @@
     display: none;
     margin-top: 20px;
   }
+
+  /* 수정 및 삭제 폼 스타일 */
+  .edit-form {
+    display: none;
+    margin-top: 20px;
+  }
 </style>
 <body>
 <h1>블로그</h1>
@@ -90,6 +96,20 @@
     var content = $('#content').val();
     var date = $('#date').val();
 
+    if (title.trim() === '' || author.trim() === '' || password.trim() === '' || content.trim() === '') {
+      alert("모든 필드를 입력해주세요.");
+      if (title.trim() === '') {
+        $('#title').focus();
+      } else if (author.trim() === '') {
+        $('#author').focus();
+      } else if (password.trim() === '') {
+        $('#password').focus();
+      } else {
+        $('#content').focus();
+      }
+      return;
+    }
+
     var post = {
       title: title,
       author: author,
@@ -112,11 +132,11 @@
 
         html += '<div class="post-content">';
         html += '<p>작성자: ' + createdPost.author + '</p>';
-        html += '<p>' + createdPost.content + '</p>';
-        html += '<p>' + createdPost.date + '</p>';
+        html += '<p>작성시간: ' + createdPost.date + '</p>';
+        html += '<p>내용: ' + createdPost.content + '</p>';
         html += '<div class="actions">';
-        html += '<button class="btn-edit" onclick="editPost(' + createdPost.id + ')">수정</button>';
-        html += '<button class="btn-delete" onclick="deletePost(' + createdPost.id + ')">삭제</button>';
+        html += '<button class="btn-edit" onclick="toggleEditForm(' + createdPost.id + ')">수정</button>';
+        html += '<button class="btn-delete" onclick="toggleDeleteForm(' + createdPost.id + ')">삭제</button>';
         html += '</div>';
         html += '</div>';
 
@@ -137,22 +157,22 @@
     $('#post_' + postId).next('.post-content').slideToggle();
   }
 
+  // 게시글 수정 폼 토글
+  function toggleEditForm(postId) {
+    $('#editForm_' + postId).slideToggle();
+  }
+
   // 게시글 수정 이벤트 핸들러
   function editPost(postId) {
-    var password = prompt('비밀번호를 입력하세요:');
-    var author = $('#post_' + postId).next('.post-content').find('p:first').text().split(':')[1].trim();
-    var title = $('#post_' + postId).find('h3').text();
-    var content = $('#post_' + postId).next('.post-content').find('p:last').text();
-
-    var newTitle = prompt('수정할 제목을 입력하세요:', title);
-    var newContent = prompt('수정할 내용을 입력하세요:', content);
+    var newTitle = $('#editTitle_' + postId).val();
+    var newContent = $('#editContent_' + postId).val();
+    var password = $('#editPassword_' + postId).val();
 
     if (newTitle && newContent && password) {
       var updatedPost = {
         title: newTitle,
         content: newContent,
-        password: password,
-        author: author
+        password: password
       };
 
       $.ajax({
@@ -165,6 +185,7 @@
           var postElement = $('#post_' + updatedPost.id);
           postElement.find('h3').text(updatedPost.title);
           postElement.next('.post-content').find('p:last').text(updatedPost.content);
+          toggleEditForm(updatedPost.id);
         },
         error: function(xhr, status, error) {
           if (xhr.status === 401) {
@@ -177,9 +198,14 @@
     }
   }
 
+  // 게시글 삭제 폼 토글
+  function toggleDeleteForm(postId) {
+    $('#deleteForm_' + postId).slideToggle();
+  }
+
   // 게시글 삭제 이벤트 핸들러
   function deletePost(postId) {
-    var password = prompt("비밀번호를 입력하세요."); // 사용자로부터 비밀번호 입력 받기
+    var password = $('#deletePassword_' + postId).val();
 
     if (password) {
       // 입력된 비밀번호가 있는 경우에만 요청 보내기
@@ -217,12 +243,30 @@
 
           html += '<div class="post-content">';
           html += '<p>작성자: ' + post.author + '</p>';
-          html += '<p>' + post.content + '</p>';
-          html += '<p>' + post.date + '</p>';
+          html += '<p>작성시간: ' + post.date + '</p>';
+          html += '<p>내용: ' + post.content + '</p>';
           html += '<div class="actions">';
-          html += '<button class="btn-edit" onclick="editPost(' + post.id + ')">수정</button>';
-          html += '<button class="btn-delete" onclick="deletePost(' + post.id + ')">삭제</button>';
+          html += '<button class="btn-edit" onclick="toggleEditForm(' + post.id + ')">수정</button>';
+          html += '<button class="btn-delete" onclick="toggleDeleteForm(' + post.id + ')">삭제</button>';
           html += '</div>';
+          html += '</div>';
+
+          // 수정 폼
+          html += '<div id="editForm_' + post.id + '" style="display: none;">';
+          html += '<label for="editTitle_' + post.id + '">제목:</label>';
+          html += '<input type="text" id="editTitle_' + post.id + '" value="' + post.title + '" required><br>';
+          html += '<label for="editContent_' + post.id + '">내용:</label><br>';
+          html += '<textarea id="editContent_' + post.id + '" rows="5" required>' + post.content + '</textarea><br>';
+          html += '<label for="editPassword_' + post.id + '">비밀번호:</label>';
+          html += '<input type="password" id="editPassword_' + post.id + '" required><br>';
+          html += '<button type="button" onclick="editPost(' + post.id + ')">수정</button>';
+          html += '</div>';
+
+          // 삭제 폼
+          html += '<div id="deleteForm_' + post.id + '" style="display: none;">';
+          html += '<label for="deletePassword_' + post.id + '">비밀번호:</label>';
+          html += '<input type="password" id="deletePassword_' + post.id + '" required><br>';
+          html += '<button type="button" onclick="deletePost(' + post.id + ')">삭제</button>';
           html += '</div>';
         }
 
