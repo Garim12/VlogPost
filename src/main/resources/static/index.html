@@ -22,6 +22,10 @@
     cursor: pointer;
   }
 
+  .post-content {
+    display: none;
+  }
+
   .post h3 {
     font-size: 24px;
     margin-bottom: 10px;
@@ -75,7 +79,7 @@
 <script>
   // 글 작성 폼 토글
   function toggleCreatePostForm() {
-    $('#createPostForm').toggle();
+    $('#createPostForm').slideToggle();
   }
 
   // 게시글 작성 이벤트 핸들러
@@ -84,12 +88,14 @@
     var author = $('#author').val();
     var password = $('#password').val();
     var content = $('#content').val();
+    var date = $('#date').val();
 
     var post = {
       title: title,
       author: author,
       password: password,
-      content: content
+      content: content,
+      date: date
     };
 
     $.ajax({
@@ -107,6 +113,7 @@
         html += '<div class="post-content">';
         html += '<p>작성자: ' + createdPost.author + '</p>';
         html += '<p>' + createdPost.content + '</p>';
+        html += '<p>' + createdPost.date + '</p>';
         html += '<div class="actions">';
         html += '<button class="btn-edit" onclick="editPost(' + createdPost.id + ')">수정</button>';
         html += '<button class="btn-delete" onclick="deletePost(' + createdPost.id + ')">삭제</button>';
@@ -119,6 +126,7 @@
         $('#author').val('');
         $('#password').val('');
         $('#content').val('');
+        $('#date').val('');
         toggleCreatePostForm();
       }
     });
@@ -126,7 +134,7 @@
 
   // 게시글 상세 내용 토글
   function togglePostContent(postId) {
-    $('#post_' + postId + ' + .post-content').toggle();
+    $('#post_' + postId).next('.post-content').slideToggle();
   }
 
   // 게시글 수정 이벤트 핸들러
@@ -203,6 +211,7 @@
           html += '<div class="post-content">';
           html += '<p>작성자: ' + post.author + '</p>';
           html += '<p>' + post.content + '</p>';
+          html += '<p>' + post.date + '</p>';
           html += '<div class="actions">';
           html += '<button class="btn-edit" onclick="editPost(' + post.id + ')">수정</button>';
           html += '<button class="btn-delete" onclick="deletePost(' + post.id + ')">삭제</button>';
@@ -210,7 +219,8 @@
           html += '</div>';
         }
 
-        $('#posts').html(html);
+        $('#posts').append(html);
+        $('.post-content').hide();
       }
     });
   }
