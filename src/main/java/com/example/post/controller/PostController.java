@@ -1,6 +1,5 @@
 package com.example.post.controller;
 
-import com.example.post.dto.JDBCRepository;
 import com.example.post.dto.PostRepository;
 import com.example.post.entity.Post;
 import org.springframework.http.HttpStatus;
@@ -13,9 +12,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class PostController {
-    private final JDBCRepository<Post, Long> postRepository;
+    private final PostRepository<Post, Long> postRepository;
 
-    public PostController(JDBCRepository<Post, Long> postRepository) {
+    public PostController(PostRepository<Post, Long> postRepository) {
         this.postRepository = postRepository;
     }
 
