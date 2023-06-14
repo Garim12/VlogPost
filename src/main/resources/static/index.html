@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>게시판</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<style>
+  /* 게시글 요소 스타일 */
+  .post {
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+  }
+
+  .post h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .post p {
+    margin-bottom: 10px;
+  }
+
+  .post .actions {
+    margin-top: 10px;
+  }
+
+  /* 버튼 스타일 */
+  .btn-edit,
+  .btn-delete {
+    margin-right: 5px;
+  }
+
+  /* 글 작성 폼 스타일 */
+  #createPostForm {
+    display: none;
+    margin-top: 20px;
+  }
+</style>
+<body>
+<h1>블로그</h1>
+
+<h2>글 작성</h2>
+<button id="toggleCreatePostForm" onclick="toggleCreatePostForm()">글 작성하기</button>
+
+<div id="createPostForm">
+  <form>
+    <label for="title">제목:</label>
+    <input type="text" id="title" required><br>
+    <label for="author">작성자:</label>
+    <input type="text" id="author" required><br>
+    <label for="password">비밀번호:</label>
+    <input type="password" id="password" required><br>
+    <label for="content">내용:</label><br>
+    <textarea id="content" rows="5" required></textarea><br>
+    <button type="button" onclick="createPost()">작성</button>
+  </form>
+</div>
+
+<hr>
+
+<h2>게시글 목록</h2>
+<div id="posts"></div>
+
+<script>
+  // 글 작성 폼 토글
+  function toggleCreatePostForm() {
+    $('#createPostForm').toggle();
+  }
+
+  // 게시글 작성 이벤트 핸들러
+  function createPost() {
+    var title = $('#title').val();
+    var author = $('#author').val();
+    var password = $('#password').val();
+    var content = $('#content').val();
+
+    var post = {
+      title: title,
+      author: author,
+      password: password,
+      content: content
+    };
+
+    $.ajax({
+      url: '/api/posts',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(post),
+      success: function(createdPost) {
+        // 게시글 작성 성공 후 목록에 추가
+        var html = '';
+        html += '<div class="post" id="post_' + createdPost.id + '" onclick="togglePostContent(' + createdPost.id + ')">';
+        html += '<h3>' + createdPost.title + '</h3>';
+        html += '</div>';
+
+        html += '<div class="post-content">';
+        html += '<p>작성자: ' + createdPost.author + '</p>';
+        html += '<p>' + createdPost.content + '</p>';
+        html += '<div class="actions">';
+        html += '<button class="btn-edit" onclick="editPost(' + createdPost.id + ')">수정</button>';
+        html += '<button class="btn-delete" onclick="deletePost(' + createdPost.id + ')">삭제</button>';
+        html += '</div>';
+        html += '</div>';
+
+        $('#posts').append(html);
+        alert("글이 작성되었습니다.");
+        $('#title').val('');
+        $('#author').val('');
+        $('#password').val('');
+        $('#content').val('');
+        toggleCreatePostForm();
+      }
+    });
+  }
+
+  // 게시글 상세 내용 토글
+  function togglePostContent(postId) {
+    $('#post_' + postId + ' + .post-content').toggle();
+  }
+
+  // 게시글 수정 이벤트 핸들러
+  function editPost(postId) {
+    var newTitle = prompt('수정할 제목을 입력하세요:');
+    var newContent = prompt('수정할 내용을 입력하세요:');
+    var password = prompt('비밀번호를 입력하세요:');
+
+    if (newTitle && newContent && author && password) {
+      var updatedPost = {
+        title: newTitle,
+        content: newContent,
+        password: password
+      };
+
+      $.ajax({
+        url: '/api/posts/' + postId,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(updatedPost),
+        success: function(updatedPost) {
+          // 게시글 수정 성공 후 해당 게시글 업데이트
+          var postElement = $('#post_' + updatedPost.id);
+          postElement.find('h3').text(updatedPost.title);
+          postElement.next('.post-content').find('p:last').text(updatedPost.content);
+        },
+        error: function(xhr, status, error) {
+          if (xhr.status === 401) {
+            alert('비밀번호가 틀렸습니다.');
+          } else {
+            alert('게시글 수정에 실패했습니다. 다시 시도해주세요.');
+          }
+        }
+      });
+    }
+  }
+
+  // 게시글 삭제 이벤트 핸들러
+  function deletePost(postId) {
+    var password = prompt("비밀번호를 입력하세요."); // 사용자로부터 비밀번호 입력 받기
+
+    if (password) {
+      // 입력된 비밀번호가 있는 경우에만 요청 보내기
+      fetch(`/api/posts/${postId}?password=${password}`, {
+        method: 'DELETE',
+      })
+              .then(function(response) {
+                if (response.ok) {
+                  alert("게시물이 성공적으로 삭제되었습니다.");
+                  location.reload(); // 페이지 새로고침
+                } else if (response.status === 401) {
+                  alert('비밀번호가 틀렸습니다.');
+                } else {
+                  alert('게시물 삭제에 실패했습니다. 다시 시도해주세요.');
+                }
+              });
+    }
+  }
+
+  // 초기화 함수
+  function initialize() {
+    $.ajax({
+      url: '/api/posts',
+      type: 'GET',
+      success: function(posts) {
+        // 서버에서 모든 게시글 가져오기 성공 시 목록에 추가
+        var html = '';
+        for (var i = 0; i < posts.length; i++) {
+          var post = posts[i];
+          html += '<div class="post" id="post_' + post.id + '" onclick="togglePostContent(' + post.id + ')">';
+          html += '<h3>' + post.title + '</h3>';
+          html += '</div>';
+
+          html += '<div class="post-content">';
+          html += '<p>작성자: ' + post.author + '</p>';
+          html += '<p>' + post.content + '</p>';
+          html += '<div class="actions">';
+          html += '<button class="btn-edit" onclick="editPost(' + post.id + ')">수정</button>';
+          html += '<button class="btn-delete" onclick="deletePost(' + post.id + ')">삭제</button>';
+          html += '</div>';
+          html += '</div>';
+        }
+
+        $('#posts').html(html);
+      }
+    });
+  }
+
+  // 초기화 함수 호출
+  $(document).ready(function() {
+    initialize();
+  });
+</script>
+</body>
+</html>
