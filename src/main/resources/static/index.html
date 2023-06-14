@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>게시판</title>
+  <title>블로그</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -139,15 +139,20 @@
 
   // 게시글 수정 이벤트 핸들러
   function editPost(postId) {
-    var newTitle = prompt('수정할 제목을 입력하세요:');
-    var newContent = prompt('수정할 내용을 입력하세요:');
     var password = prompt('비밀번호를 입력하세요:');
+    var author = $('#post_' + postId).next('.post-content').find('p:first').text().split(':')[1].trim();
+    var title = $('#post_' + postId).find('h3').text();
+    var content = $('#post_' + postId).next('.post-content').find('p:last').text();
 
-    if (newTitle && newContent && author && password) {
+    var newTitle = prompt('수정할 제목을 입력하세요:', title);
+    var newContent = prompt('수정할 내용을 입력하세요:', content);
+
+    if (newTitle && newContent && password) {
       var updatedPost = {
         title: newTitle,
         content: newContent,
-        password: password
+        password: password,
+        author: author
       };
 
       $.ajax({
@@ -201,6 +206,8 @@
       type: 'GET',
       success: function(posts) {
         // 서버에서 모든 게시글 가져오기 성공 시 목록에 추가
+        posts.reverse();
+
         var html = '';
         for (var i = 0; i < posts.length; i++) {
           var post = posts[i];
