@@ -1,4 +1,4 @@
-package com.example.post.dto;
+package com.example.post.repository;
 
 import com.example.post.entity.Post;
 import org.springframework.stereotype.Component;
