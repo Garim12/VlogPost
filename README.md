@@ -10,6 +10,6 @@
   지금같은 간단한 블로그의 경우 CRUD가 Data 테이블을 id,title,author,password,content,date만 있어 중간은 간다고 생각함
 
 4. 적절한 관심사 분리를 적용하였나요? (Controller, Repository, Service)
-    Controller,Repository 두개만 적용함
+    Controller(http요청) ,Repository(SQL 저장소), Service(기능) 적용분리후 적상 작동확인
 
 5. API 명세서 작성 가이드라인을 검색하여 직접 작성한 API 명세서와 비교해보세요!
