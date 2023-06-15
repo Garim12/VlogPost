@@ -53,14 +53,14 @@ public class PostRepository<P, L extends Number> {
             int affectedRows = stmt.executeUpdate();
 
             if (affectedRows == 0) {
-                throw new SQLException("Creating post failed, no rows affected.");
+                throw new SQLException("게시물 작성을 실패하였습니다. 다시 확인해주세요.");
             }
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     post.setId(generatedKeys.getLong(1));
                 } else {
-                    throw new SQLException("Creating post failed, no ID obtained.");
+                    throw new SQLException("게시물 작성을 실패하였습니다. 다시 확인해주세요.");
                 }
             }
         } catch (SQLException e) {
