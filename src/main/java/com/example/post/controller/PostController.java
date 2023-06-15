@@ -31,7 +31,7 @@ public class PostController {
     }
 
     // 선택한 게시글 조회 API
-    @GetMapping("/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<Post> getPostById(@PathVariable Long postId) {
         postService postService = new postService(postRepository);
         return postService.getPostById(postId);

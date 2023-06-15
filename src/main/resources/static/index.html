@@ -148,6 +148,7 @@
         $('#content').val('');
         $('#date').val('');
         toggleCreatePostForm();
+        window.location.reload();
       }
     });
   }
@@ -186,6 +187,8 @@
           postElement.find('h3').text(updatedPost.title);
           postElement.next('.post-content').find('p:last').text(updatedPost.content);
           toggleEditForm(updatedPost.id);
+          alert('수정이 안료되었습니다.');
+          window.location.reload();
         },
         error: function(xhr, status, error) {
           if (xhr.status === 401) {
