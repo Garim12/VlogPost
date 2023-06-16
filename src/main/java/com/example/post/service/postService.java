@@ -4,10 +4,12 @@ import com.example.post.entity.Post;
 import com.example.post.repository.PostRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Component
 public class postService {
     private final PostRepository<Post, Long> postRepository;
 
