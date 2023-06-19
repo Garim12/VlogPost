@@ -168,12 +168,14 @@
     var newTitle = $('#editTitle_' + postId).val();
     var newContent = $('#editContent_' + postId).val();
     var password = $('#editPassword_' + postId).val();
+    var author = $('#editAuthor' + postId).val();
 
     if (newTitle && newContent && password) {
       var updatedPost = {
         title: newTitle,
         content: newContent,
-        password: password
+        password: password,
+        author: author
       };
 
       $.ajax({
@@ -235,7 +237,6 @@
       type: 'GET',
       success: function(posts) {
         // 서버에서 모든 게시글 가져오기 성공 시 목록에 추가
-        posts.reverse();
 
         var html = '';
         for (var i = 0; i < posts.length; i++) {
