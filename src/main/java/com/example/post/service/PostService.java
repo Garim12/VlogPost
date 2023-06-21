@@ -1,23 +1,22 @@
+// PostService.java
 package com.example.post.service;
 
+import com.example.post.dto.PostDto;
 import com.example.post.entity.Post;
 import com.example.post.repository.PostRepository;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@ComponentScan
-public class postService {
+public class PostService {
     private final PostRepository postRepository;
 
-    public postService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
 
@@ -25,7 +24,12 @@ public class postService {
         return postRepository.findAllByOrderByDateDesc();
     }
 
-    public Post createPost(Post post) {
+    public Post createPost(PostDto postDto) {
+        Post post = new Post();
+        post.setTitle(postDto.getTitle());
+        post.setAuthor(postDto.getAuthor());
+        post.setPassword(postDto.getPassword());
+        post.setContent(postDto.getContent());
         post.setDate(LocalDateTime.now());
         return postRepository.save(post);
     }
@@ -40,14 +44,14 @@ public class postService {
         }
     }
 
-    public ResponseEntity<Post> updatePost(Long postId, Post updatedPost) {
+    public ResponseEntity<Post> updatePost(Long postId, PostDto updatedPostDto) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()) {
             Post post = optionalPost.get();
-            if (post.getPassword().equals(updatedPost.getPassword())) {
-                post.setTitle(updatedPost.getTitle());
-                post.setAuthor(updatedPost.getAuthor() != null ? updatedPost.getAuthor() : post.getAuthor());
-                post.setContent(updatedPost.getContent());
+            if (post.getPassword().equals(updatedPostDto.getPassword())) {
+                post.setTitle(updatedPostDto.getTitle());
+                post.setAuthor(updatedPostDto.getAuthor() != null ? updatedPostDto.getAuthor() : post.getAuthor());
+                post.setContent(updatedPostDto.getContent());
                 postRepository.save(post);
                 return ResponseEntity.ok(post);
             } else {
@@ -71,10 +75,5 @@ public class postService {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private String formatDate(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return dateTime.format(formatter);
     }
 }
